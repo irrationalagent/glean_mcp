@@ -7,7 +7,7 @@
 
 `source venv/bin/activate`
 
-`pip install -e .`
+`pip3 install -e .`
 
 # Run (Standalone)
 `glean-mcp`
