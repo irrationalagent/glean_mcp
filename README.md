@@ -1,11 +1,13 @@
 # Installation
+`git clone https://github.com/irrationalagent/glean_mcp`
 
-Clone the repo. If you have a project folder with other MCP servers you are using, that would be a good place to put it.
+`cd glean_mcp`
+
 `python3 -m venv venv`
 
-`source .venv/bin/activate`
+`source venv/bin/activate`
 
-`pip3 install -e .`
+`pip install -e .`
 
 # Run (Standalone)
 `glean-mcp`
