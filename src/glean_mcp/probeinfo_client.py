@@ -1,5 +1,5 @@
 from __future__ import annotations
-import httpx, json, hashlib, time
+import httpx, json, hashlib, time, difflib
 from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from diskcache import Cache
@@ -186,7 +186,29 @@ def get_glean_metrics(v1_name: str) -> Dict[str, List[MetricHistory]]:
         >>>     print(f"{metric_name}: {history[0].type}")
     """
     url = f"{BASE_V1}/glean/{v1_name}/metrics"
-    raw = _get(url)
+
+    try:
+        raw = _get(url)
+    except httpx.HTTPStatusError as e:
+        # If we get a 404, try to find the closest matching v1_name
+        if e.response.status_code == 404:
+            apps = list_apps()
+            available_names = [app.v1_name for app in apps]
+
+            # Use difflib to find the closest match
+            matches = difflib.get_close_matches(v1_name, available_names, n=1, cutoff=0.6)
+
+            if matches:
+                closest_match = matches[0]
+                # Retry with the closest match
+                url = f"{BASE_V1}/glean/{closest_match}/metrics"
+                raw = _get(url)
+            else:
+                # No close match found, re-raise the original error
+                raise
+        else:
+            # Not a 404, re-raise the error
+            raise
 
     # Parse each metric's history into MetricHistory objects
     result: Dict[str, List[MetricHistory]] = {}
