@@ -152,15 +152,18 @@ def get_glean_metrics(v1_name: str) -> Dict[str, List[MetricHistory]]:
 
     # Parse each metric's history into MetricHistory objects
     result: Dict[str, List[MetricHistory]] = {}
-    for metric_name, history_list in raw.items():
+    for metric_name, metric_data in raw.items():
         parsed_history = []
-        for entry in history_list:
-            # Handle case where entry might be a string or dict
-            if isinstance(entry, dict):
-                parsed_history.append(MetricHistory(**entry))
-            elif isinstance(entry, str):
-                # Skip string entries or handle them appropriately
-                continue
+        # The v1 API returns each metric as a dict with a "history" key
+        if isinstance(metric_data, dict) and "history" in metric_data:
+            history_list = metric_data["history"]
+            for entry in history_list:
+                # Handle case where entry might be a string or dict
+                if isinstance(entry, dict):
+                    parsed_history.append(MetricHistory(**entry))
+                elif isinstance(entry, str):
+                    # Skip string entries or handle them appropriately
+                    continue
         result[metric_name] = parsed_history
 
     return result
