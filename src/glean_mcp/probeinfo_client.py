@@ -1,7 +1,7 @@
 from __future__ import annotations
 import httpx, json, hashlib, time
-from typing import Any, Dict, List, Optional
-from pydantic import BaseModel
+from typing import Any, Dict, List, Optional, Union
+from pydantic import BaseModel, field_validator
 from diskcache import Cache
 
 BASE_V2 = "https://probeinfo.telemetry.mozilla.org/v2"
@@ -60,8 +60,16 @@ class MetricHistory(BaseModel):
     metadata: Optional[Dict[str, Any]] = None
     send_in_pings: Optional[List[str]] = None
     type: Optional[str] = None
-    version: Optional[str] = None
+    version: Optional[Union[str, int]] = None
     extra_keys: Optional[Dict[str, Any]] = None
+
+    @field_validator('version', mode='before')
+    @classmethod
+    def convert_version_to_str(cls, v):
+        """Convert version to string if it's an integer."""
+        if v is not None and isinstance(v, int):
+            return str(v)
+        return v
 
 class GleanDependency(BaseModel):
     """Dependency information for a Glean app."""
