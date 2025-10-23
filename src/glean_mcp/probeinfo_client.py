@@ -1,7 +1,7 @@
 from __future__ import annotations
 import httpx, json, hashlib, time
 from typing import Any, Dict, List, Optional, Union
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from diskcache import Cache
 
 BASE_V2 = "https://probeinfo.telemetry.mozilla.org/v2"
@@ -50,6 +50,8 @@ class GleanGeneral(BaseModel):
 
 class MetricHistory(BaseModel):
     """History entry for a Glean metric."""
+    model_config = ConfigDict(populate_by_name=True)
+
     bugs: Optional[List[str]] = None
     data_reviews: Optional[List[str]] = None
     dates: Optional[Dict[str, Any]] = None
@@ -68,9 +70,9 @@ class MetricHistory(BaseModel):
     data_sensitivity: Optional[List[str]] = None
     notification_emails: Optional[List[str]] = None
     no_lint: Optional[List[str]] = None
-    reflog_index: Optional[Dict[str, int]] = None  # Contains "first" and "last" indices
-    git_commits: Optional[Dict[str, Any]] = None
-    _config: Optional[Dict[str, Any]] = None
+    reflog_index: Optional[Dict[str, int]] = Field(default=None, alias='reflog-index')
+    git_commits: Optional[Dict[str, Any]] = Field(default=None, alias='git-commits')
+    config: Optional[Dict[str, Any]] = Field(default=None, alias='_config')
     allow_reserved: Optional[bool] = None
 
     @field_validator('version', mode='before')
@@ -89,6 +91,14 @@ class MetricHistory(BaseModel):
             return v
         if isinstance(v, list):
             return [str(item) if isinstance(item, int) else item for item in v]
+        return v
+
+    @field_validator('expires', mode='before')
+    @classmethod
+    def convert_expires_to_str(cls, v):
+        """Convert expires to string if it's an integer."""
+        if v is not None and isinstance(v, int):
+            return str(v)
         return v
 
 class GleanDependency(BaseModel):
