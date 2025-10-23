@@ -13,7 +13,7 @@ def _ck(url: str) -> str:
     """Generate cache key from URL."""
     return hashlib.sha1(url.encode()).hexdigest()
 
-def _get(url: str, ttl: int = 900) -> Any:
+def _get(url: str, ttl: int = 86400) -> Any:
     """
     HTTP GET with disk caching.
 
