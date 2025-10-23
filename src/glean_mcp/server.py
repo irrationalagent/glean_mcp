@@ -39,32 +39,6 @@ def search_metrics(query: str, app_hint: str | None = None, limit: int = 25) -> 
     return json.dumps(compact, indent=2)
 
 @mcp.tool()
-def get_metrics_for_app(v1_name: str) -> str:
-    """
-    Get all metric definitions and history for a Glean application from probe-info service.
-
-    - v1_name: The v1_name identifier (e.g., "fenix", "firefox-desktop", "focus-android")
-
-    Returns a dictionary mapping metric names to their history arrays.
-    Each history entry includes:
-    - bugs: List of bug URLs
-    - data_reviews: List of data review URLs
-    - description: Metric description
-    - lifetime: Metric lifetime (e.g., "ping", "application")
-    - send_in_pings: List of ping names this metric is sent in
-    - type: Metric type (e.g., "counter", "string", "boolean")
-    - dates: Date information for when the metric was active
-    - extra_keys: Additional metadata for events
-    """
-    metrics = get_glean_metrics(v1_name)
-    # Convert MetricHistory objects to dicts for JSON serialization
-    serializable = {
-        metric_name: [history.model_dump() for history in history_list]
-        for metric_name, history_list in metrics.items()
-    }
-    return json.dumps(serializable, indent=2)
-
-@mcp.tool()
 def get_metric_details(v1_name: str, metric_name: str) -> str:
     """
     Get detailed information for a specific metric including extra_keys.
