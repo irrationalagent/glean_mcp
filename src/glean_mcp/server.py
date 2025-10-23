@@ -64,6 +64,33 @@ def get_metrics_for_app(v1_name: str) -> str:
     }
     return json.dumps(serializable, indent=2)
 
+@mcp.tool()
+def get_metric_details(v1_name: str, metric_name: str) -> str:
+    """
+    Get detailed information for a specific metric including extra_keys.
+    
+    - v1_name: App identifier (e.g., "fenix")
+    - metric_name: Full metric name (e.g., "collections.save_button")
+    
+    Returns the most recent metric definition with all fields.
+    """
+    metrics = get_glean_metrics(v1_name)
+    if metric_name not in metrics:
+        return json.dumps({"error": f"Metric '{metric_name}' not found in {v1_name}"})
+
+    history = metrics[metric_name]
+    if not history:
+        return json.dumps({"error": f"No history found for '{metric_name}'"})
+
+    # Return most recent entry (first in history array)
+    latest = history[0].model_dump(exclude_none=True)
+
+    return json.dumps({
+        "metric": metric_name,
+        "app": v1_name,
+        "latest_definition": latest
+    }, indent=2)
+
 def main():
     mcp.run()
 
