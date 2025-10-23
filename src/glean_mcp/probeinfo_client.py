@@ -62,6 +62,16 @@ class MetricHistory(BaseModel):
     type: Optional[str] = None
     version: Optional[Union[str, int]] = None
     extra_keys: Optional[Dict[str, Any]] = None
+    # Additional fields found in the API response
+    gecko_datapoint: Optional[str] = None
+    source_url: Optional[str] = None
+    data_sensitivity: Optional[List[str]] = None
+    notification_emails: Optional[List[str]] = None
+    no_lint: Optional[List[str]] = None
+    reflog_index: Optional[Dict[str, int]] = None  # Contains "first" and "last" indices
+    git_commits: Optional[Dict[str, Any]] = None
+    _config: Optional[Dict[str, Any]] = None
+    allow_reserved: Optional[bool] = None
 
     @field_validator('version', mode='before')
     @classmethod
@@ -69,6 +79,16 @@ class MetricHistory(BaseModel):
         """Convert version to string if it's an integer."""
         if v is not None and isinstance(v, int):
             return str(v)
+        return v
+
+    @field_validator('bugs', mode='before')
+    @classmethod
+    def convert_bugs_to_str(cls, v):
+        """Convert bug IDs to strings if they're integers."""
+        if v is None:
+            return v
+        if isinstance(v, list):
+            return [str(item) if isinstance(item, int) else item for item in v]
         return v
 
 class GleanDependency(BaseModel):
