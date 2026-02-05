@@ -1,3 +1,6 @@
+# DEPRECATED
+[Use this instead](https://github.com/mozilla/glean-dictionary/blob/main/docs/mcp-server.md) - its much better.
+
 # Installation
 `git clone https://github.com/irrationalagent/glean_mcp`
 
